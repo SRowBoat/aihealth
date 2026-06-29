@@ -2,6 +2,8 @@
 
 To calculate your score, sum the values of all indicators (Total range: 0–110, including weighted time factors).
 
+[working demo](https://srowboat.github.io/aihealth/)
+
 ### Tiers
 
 *   **Tier 1: Stable User (0–20)**

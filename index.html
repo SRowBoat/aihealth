@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Interaction Diagnostic Tool</title>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 2rem auto; padding: 1rem; background: #f8fafc; line-height: 1.6; }
+        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .row { display: flex; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #eee; padding-bottom: 1rem; }
+        .label { flex: 2; font-weight: 500; }
+        .buttons { flex: 3; display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; }
+        .btn { padding: 6px 10px; border: 1px solid #cbd5e1; cursor: pointer; background: white; border-radius: 4px; font-size: 0.75rem; }
+        .btn.active { background: #2563eb; color: white; border-color: #2563eb; }
+        .slider-row { margin: 2rem 0; padding: 1.5rem; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; }
+        input[type=range] { width: 100%; cursor: pointer; margin-top: 0.5rem; }
+        .score-box { background: #1e293b; color: white; padding: 2rem; border-radius: 8px; text-align: center; margin: 2rem 0; }
+        #total-score { font-size: 3.5rem; font-weight: 900; }
+        .info-section { margin-top: 2rem; }
+        h3 { color: #2563eb; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>AI-Interaction Health Calculator</h1>
+    <p>This calculator functions as a self-reflective audit tool. Each indicator ranges from <strong>0 (Never/Not at all)</strong> to <strong>10 (Constantly/Extremely)</strong>.</p>
+    
+    <div id="grid"></div>
+
+    <div class="slider-row">
+        <label style="font-weight:900">11. Hours spent per day: <span id="time-val" style="color:#2563eb">0</span></label>
+        <input type="range" id="time-slider" min="0" max="20" value="0" oninput="updateTime(this.value)">
+    </div>
+
+    <div class="score-box">
+        <div>Risk Score (Weighted)</div>
+        <div id="total-score">0</div>
+        <div id="tier-display" style="font-weight: bold; margin-top: 0.5rem;">Status: Tier 1 - Stable</div>
+    </div>
+
+    <div class="info-section">
+        <h3>Scoring & Tier Breakdown</h3>
+        <ul>
+            <li><strong>Tier 1: Stable User (0–20)</strong><br>Healthy engagement. The AI is a tool, not an ontological anchor.</li>
+            <li><strong>Tier 2: High-Engagement (21–40)</strong><br>Potential "Loop" formation. You are becoming deeply invested; consider "analog" breaks.</li>
+            <li><strong>Tier 3: Cautionary Zone (41–65)</strong><br>Risk of Reality Erosion. You may be in a "sycophancy trap." Pause usage for 48–72 hours.</li>
+            <li><strong>Tier 4: Clinical Concern (66+)</strong><br>Disconnect from Reality. Stop immediately and consult a professional.</li>
+        </ul>
+
+        <h3>Technical & Contextual Notes</h3>
+        <p><strong>The "Loop" Hazard:</strong> LLMs are designed to be helpful, which can inadvertently confirm your internal state rather than provide objective information.</p>
+        <p><strong>Dynamic Weighting:</strong> Scoring highly on <em>Agency Attribution</em> or <em>Prophetic Bias</em> are high-fidelity indicators of psychological projection.</p>
+        <p><strong>Time Context:</strong> The "Hours per day" slider acts as a weighted multiplier (up to 2.0x), as prolonged exposure significantly accelerates the risk of reality-testing erosion.</p>
+    </div>
+
+    <p style="font-size: 0.8rem; color: #666; font-style: italic; border-top: 1px solid #ddd; pt: 1rem;">
+        <strong>Important:</strong> This is a self-reflective tool and is not a substitute for professional mental health advice.
+    </p>
+</div>
+
+<script>
+    const indicators = [
+        "1. Dependency: I rely on AI to validate my logic.",
+        "2. Emotional Impact: Mood shifts based on AI agreement.",
+        "3. Agency Attribution: AI has 'coded' or secret intent.",
+        "4. Social Displacement: Prefer AI over real people.",
+        "5. Information Anchoring: Struggle to accept AI errors.",
+        "6. Time Perception: Lose track of time/needs.",
+        "7. Prophetic Bias: Finding 'hidden' life meanings.",
+        "8. Resistance: Urge to 'correct' AI to my premise.",
+        "9. Reality Blur: Treating AI as equal to empirical data.",
+        "10. Withdrawal: Fear of losing 'truths' if I stop."
+    ];
+
+    let scores = new Array(indicators.length).fill(0);
+    let timeSpent = 0;
+
+    const grid = document.getElementById('grid');
+    indicators.forEach((text, i) => {
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.innerHTML = `<div class="label">${text}</div><div class="buttons" id="row-${i}"></div>`;
+        grid.appendChild(row);
+        
+        const btnContainer = document.getElementById(`row-${i}`);
+        for(let v=0; v<=10; v++) {
+            const btn = document.createElement('button');
+            btn.className = 'btn';
+            btn.innerText = v;
+            btn.onclick = () => { scores[i] = v; updateButtons(btnContainer, v); calculate(); };
+            btnContainer.appendChild(btn);
+        }
+    });
+
+    function updateButtons(container, selected) {
+        [...container.children].forEach((btn, idx) => {
+            btn.className = idx === selected ? 'btn active' : 'btn';
+        });
+    }
+
+    function updateTime(val) {
+        timeSpent = parseInt(val);
+        document.getElementById('time-val').innerText = val;
+        calculate();
+    }
+
+    function calculate() {
+        const coreSum = scores.reduce((a, b) => a + b, 0);
+        const multiplier = 1 + (timeSpent * 0.05);
+        const total = Math.round(coreSum * multiplier);
+        document.getElementById('total-score').innerText = total;
+        
+        let tier = "Tier 1 - Stable";
+        if (total > 65) tier = "Tier 4: Clinical Concern";
+        else if (total > 40) tier = "Tier 3: Cautionary Zone";
+        else if (total > 20) tier = "Tier 2: High-Engagement";
+        document.getElementById('tier-display').innerText = "Status: " + tier;
+    }
+</script>
+</body>
+</html>
